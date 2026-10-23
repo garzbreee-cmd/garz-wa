@@ -1,0 +1,41 @@
+
+name: Build Garz WA APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'remix-garz-wa.zip'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Android project
+        run: |
+          mkdir android-project
+          unzip -q remix-garz-wa.zip -d android-project
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Build debug APK
+        run: gradle -p android-project assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Garz-WA-APK
+          path: android-project/app/build/outputs/apk/debug/*.apk
